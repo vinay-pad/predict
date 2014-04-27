@@ -1,13 +1,14 @@
 import time
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404, render_to_response
+from django.contrib.auth.decorators import login_required
 
 from onecalendar.models import CalEntry
 
 mnames = "January February March April May June July August September October November December"
 mnames = mnames.split()
 
-
+@login_required
 def index(request, year=None):
 	"""Main listing, years and months; three years per page."""
 	# prev / next years
@@ -31,5 +32,4 @@ def index(request, year=None):
 			mlst.append(dict(n=n+1, name=month, entry=entry, current=current))
 		lst.append((y, mlst))
 
-	return render_to_response("onecalendar/main.html", dict(years=lst, user=request.user, year=year,
-												   reminders=reminders(request)))
+	return render_to_response("onecalendar/main.html", dict(years=lst, user=request.user, year=year))
