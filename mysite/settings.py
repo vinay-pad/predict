@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -40,7 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 	'polls',
 	'blog',
-	'onecalendar',
+	'django_facebook',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -51,6 +52,25 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+
+
+AUTHENTICATION_BACKENDS = (
+	'django_facebook.auth_backends.FacebookBackend',
+	'django.contrib.auth.backends.ModelBackend',
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.core.context_processors.tz',
+    'django.core.context_processors.request',
+    'django.contrib.messages.context_processors.messages',
+    'django_facebook.context_processors.facebook',
+)
+
 
 ROOT_URLCONF = 'mysite.urls'
 
@@ -88,4 +108,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/polls/detail/'
+LOGIN_ERROR_URL = '/login-error/'
+
+#STATICFILES_DIRS = (
+ #   os.path.join(BASE_DIR, "static"),
+#)
+
+FACEBOOK_APP_ID              = '688488047882848'
+FACEBOOK_API_SECRET          = 'ba89892196f2d6ecba6554d3358fe522'
+
+AUTH_USER_MODEL = 'django_facebook.FacebookCustomUser'
+AUTH_PROFILE_MODULE = 'django_facebook.FacebookProfile'

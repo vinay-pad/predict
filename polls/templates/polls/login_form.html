@@ -10,40 +10,66 @@
   <link rel="stylesheet" href="/static/polls/css/style.css">
   <link rel="stylesheet" href="/static/polls/css/semantic.min.css">
   <script type="text/javascript" src="/static/polls/js/jquery-1.10.2.min.js"></script>
+  <script type="text/javascript" src="/static/polls/js/jquery.cookie.js"></script>
   <!--[if lt IE 9]><script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
-	<script type="text/javascript">
-		$(document).ready(function(){
-			$("#login_click").click(function(){
-				event.preventDefault();
-				var data = $('form#login_form').serialize();
-				$.post('login', data, function(msg) { alert(msg)});
-			});
+	<script>
+
+		var csrftoken = $.cookie('csrftoken');
+		function csrfSafeMethod(method) {
+		// these HTTP methods do not require CSRF protection
+		return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+		}
+
+		$.ajaxSetup({
+			crossDomain: false, // obviates need for sameOrigin test
+			beforeSend: function(xhr, settings) {
+				if (!csrfSafeMethod(settings.type)) {
+					xhr.setRequestHeader("X-CSRFToken", csrftoken);
+				}
+			}
 		});
-	</script>
+
+window.fbAsyncInit = function() {
+	FB.init({
+		appId      : '688488047882848',
+		cookie     : true,  // enable cookies to allow the server to access 
+							// the session
+		xfbml      : true,  // parse social plugins on this page
+		version    : 'v2.0' // use version 2.0
+	});
+
+
+
+	FB.login(function(response) {
+		if (response.status === 'connected') {
+		// Logged into your app and Facebook.
+			$.post( "polls/detail/", { user: response.authResponse.accessToken } );
+		} else if (response.status === 'not_authorized') {
+		// The person is logged into Facebook, but not your app.
+		} else {
+		// The person is not logged into Facebook, so we're not sure if
+		// they are logged into this app or not.
+		}
+	}, {scope: 'public_profile,email, user_friends'});
+
+};
+
+  // Load the SDK asynchronously
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+
+</script>
 </head>
 <body>
   <section class="container">
     <div class="ui form	segment">
-      <h1>Login to Web App</h1>
-      <form id="login_form">
-	  {% csrf_token %}
-		<div class="ui input">
-  			<input type="text" name="login" placeholder="Username">
-		</div>
-        <p><input type="password" name="password" value="" placeholder="Password"></p>
-        <p class="remember_me">
-          <label>
-            <input type="checkbox" name="remember_me" id="remember_me">
-            Remember me on this computer
-          </label>
-        </p>
-        <a id="login_click" class="ui teal button">Login</a>
-      </form>
-    </div>
-
-    <div class="login-help">
-      <p>Forgot your password? <a href="index.html">Click here to reset it</a>.</p>
+      <h1>Login to App</h1>
     </div>
   </section>
 </body>
