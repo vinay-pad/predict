@@ -14,7 +14,6 @@
   <!--[if lt IE 9]><script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
 	<script>
-
 		var csrftoken = $.cookie('csrftoken');
 		function csrfSafeMethod(method) {
 		// these HTTP methods do not require CSRF protection
@@ -30,6 +29,25 @@
 			}
 		});
 
+function fb_login(){
+
+	FB.login(function(response) {
+		if (response.status === 'connected') {
+		// Logged into your app and Facebook.
+			$.post( "polls/register/", { user: response.authResponse.userID, access_token: response.authResponse.accessToken } );
+		} else if (response.status === 'not_authorized') {
+		// The person is logged into Facebook, but not your app.
+		} else {
+		// The person is not logged into Facebook, so we're not sure if
+		// they are logged into this app or not.
+		}
+	}, {scope: 'user_friends,email'});
+}
+
+function fb_logout(){
+	FB.logout(function(response) {
+	});
+}
 window.fbAsyncInit = function() {
 	FB.init({
 		appId      : '688488047882848',
@@ -40,18 +58,6 @@ window.fbAsyncInit = function() {
 	});
 
 
-
-	FB.login(function(response) {
-		if (response.status === 'connected') {
-		// Logged into your app and Facebook.
-			$.post( "polls/detail/", { user: response.authResponse.accessToken } );
-		} else if (response.status === 'not_authorized') {
-		// The person is logged into Facebook, but not your app.
-		} else {
-		// The person is not logged into Facebook, so we're not sure if
-		// they are logged into this app or not.
-		}
-	}, {scope: 'public_profile,email, user_friends'});
 
 };
 
@@ -64,13 +70,24 @@ window.fbAsyncInit = function() {
     fjs.parentNode.insertBefore(js, fjs);
   }(document, 'script', 'facebook-jssdk'));
 
+$(document).ready(function(){  
+	$('#fb_button').click(function() {
+		fb_login();
+	});
+
+	$('#fb_logout').click(function() {
+		fb_logout();
+	});
+});
 </script>
 </head>
 <body>
   <section class="container">
-    <div class="ui form	segment">
-      <h1>Login to App</h1>
-    </div>
+	<div id="fb_button" class="ui vk button">
+  		<i class="facebook icon"></i>
+  			Login to Facebook
+	</div>
+	<div id="fb_logout" class="negative ui button">Logout</div>
   </section>
 </body>
 </html>

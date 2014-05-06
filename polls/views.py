@@ -5,8 +5,10 @@ from django.contrib.auth import authenticate
 from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_protect
+import httplib2
+import urllib2
 
-from polls.models import Question
+from polls.models import User
 
 
 def index(request):
@@ -31,9 +33,14 @@ def login(request):
 	return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 @csrf_protect
-def detail(request):
-	user = request.POST['user']
-	return render(request, 'polls/detail.html', {"user": user})
+def register(request):
+	userid = request.POST['user']
+	access_token = request.POST['access_token']
+	#Now use the access token to get the user information from graph api
+	http_obj = httplib2.Http()	
+	resp, content = http_obj.request("https://graph.facebook.com/"+userid+"?access_token="+access_token, method="GET")
+	
+	return render(request, 'polls/detail.html', {"user": resp, "access": content})
 
 def vote(request, question_id):
 	return HttpResponse("You're voting on question %s." % question_id)
