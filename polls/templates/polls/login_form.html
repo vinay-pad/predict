@@ -4,16 +4,17 @@
 <!--[if IE 8]> <html class="lt-ie9" lang="en"> <![endif]-->
 <!--[if gt IE 8]><!--> <html lang="en"> <!--<![endif]-->
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>Login Form</title>
-  <link rel="stylesheet" href="/static/polls/css/style.css">
-  <link rel="stylesheet" href="/static/polls/css/semantic.min.css">
-  <script type="text/javascript" src="/static/polls/js/jquery-1.10.2.min.js"></script>
-  <script type="text/javascript" src="/static/polls/js/jquery.cookie.js"></script>
+  	<meta charset="utf-8">
+  	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  	<title>Login Form</title>
+  	<link rel="stylesheet" href="/static/polls/css/style.css">
+  	<link rel="stylesheet" href="/static/polls/css/semantic.min.css">
+  	<script type="text/javascript" src="/static/polls/js/jquery-1.10.2.min.js"></script>
+  	<script type="text/javascript" src="/static/polls/js/jquery.cookie.js"></script>
   <!--[if lt IE 9]><script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
-
 	<script>
+$(document).ready(function() {
+  $.getScript('//connect.facebook.net/en_UK/all.js', function(){
 		var csrftoken = $.cookie('csrftoken');
 		function csrfSafeMethod(method) {
 		// these HTTP methods do not require CSRF protection
@@ -29,57 +30,55 @@
 			}
 		});
 
-function fb_login(){
-
-	FB.login(function(response) {
-		if (response.status === 'connected') {
-		// Logged into your app and Facebook.
-			$.post( "polls/register/", { user: response.authResponse.userID, access_token: response.authResponse.accessToken } );
-		} else if (response.status === 'not_authorized') {
-		// The person is logged into Facebook, but not your app.
-		} else {
-		// The person is not logged into Facebook, so we're not sure if
-		// they are logged into this app or not.
+		function fb_login(){
+			FB.login(function(response) {
+				if (response.status === 'connected') {
+				// Logged into your app and Facebook.
+					$.post( "polls/register/", { user: response.authResponse.userID, access_token: response.authResponse.accessToken } );
+				} else if (response.status === 'not_authorized') {
+				// The person is logged into Facebook, but not your app.
+				} else {
+				// The person is not logged into Facebook, so we're not sure if
+				// they are logged into this app or not.
+				}
+			}, {scope: 'publish_actions,user_friends,email,user_tagged_places'});
 		}
-	}, {scope: 'user_friends,email'});
-}
 
-function fb_logout(){
-	FB.logout(function(response) {
-	});
-}
-window.fbAsyncInit = function() {
-	FB.init({
-		appId      : '688488047882848',
-		cookie     : true,  // enable cookies to allow the server to access 
-							// the session
-		xfbml      : true,  // parse social plugins on this page
-		version    : 'v2.0' // use version 2.0
-	});
+		function fb_logout(){
+			 FB.logout(function(){document.location.reload();});
+		}
+		window.fbAsyncInit = function() {
+			FB.init({
+				appId      : '688488047882848',
+				cookie     : true,  // enable cookies to allow the server to access 
+									// the session
+				xfbml      : true,  // parse social plugins on this page
+				version    : 'v2.0' // use version 2.0
+			});
 
 
 
-};
+		};
 
-  // Load the SDK asynchronously
-  (function(d, s, id) {
-    var js, fjs = d.getElementsByTagName(s)[0];
-    if (d.getElementById(id)) return;
-    js = d.createElement(s); js.id = id;
-    js.src = "//connect.facebook.net/en_US/sdk.js";
-    fjs.parentNode.insertBefore(js, fjs);
-  }(document, 'script', 'facebook-jssdk'));
+		  // Load the SDK asynchronously
+		  (function(d, s, id) {
+			var js, fjs = d.getElementsByTagName(s)[0];
+			if (d.getElementById(id)) return;
+			js = d.createElement(s); js.id = id;
+			js.src = "//connect.facebook.net/en_US/sdk.js";
+			fjs.parentNode.insertBefore(js, fjs);
+		  }(document, 'script', 'facebook-jssdk'));
 
-$(document).ready(function(){  
-	$('#fb_button').click(function() {
-		fb_login();
-	});
+			$('#fb_button').click(function() {
+				fb_login();
+			});
 
-	$('#fb_logout').click(function() {
-		fb_logout();
-	});
+			$('#fb_logout').click(function() {
+				fb_logout();
+			});
+		});
 });
-</script>
+	</script>
 </head>
 <body>
   <section class="container">

@@ -10,6 +10,7 @@ import httplib2
 import urllib2
 
 from polls.models import User
+from polls.places import store_tagged_places
 
 
 def index(request):
@@ -37,23 +38,37 @@ def login(request):
 def register(request):
 	userid = request.POST['user']
 	access_token = request.POST['access_token']
-	#Now use the access token to get the user information from graph api
-	http_obj = httplib2.Http()	
-	resp, content = http_obj.request("https://graph.facebook.com/"+userid+"?access_token="+access_token, method="GET")
-	content = json.loads(content)	
-	#confirm userid is equal to id returned from graph api
-	if userid != content['id']:
-		return render(request, 'polls/error.html', {"message": "Something went wrong. Please logout and login again!"})
-	user = User()
-	user.userid = content['id']
-	user.firstname = content['first_name']
-	user.lastname = content['last_name']
-	user.email = content['email']
-	user.birthday = datetime.strptime(content['birthday'], '%m/%d/%Y')
-	user.gender = content['gender'] 
-	user.save()	
+	
+	if  userid and access_token:
+		#Now use the access token to get the user information from graph api
+		http_obj = httplib2.Http()	
+		try:
+			resp, content = http_obj.request("https://graph.facebook.com/"+userid+"?access_token="+access_token, method="GET")
+			content = json.loads(content)	
+		except:
+			return render(request, 'polls/error.html', {"message": "Something went wrong. Please logout and login again!"})
 
-	return render(request, 'polls/detail.html', {"user": resp, "access": user.birthday})
+		#confirm userid is equal to id returned from graph api
+		if userid != content['id']:
+			return render(request, 'polls/error.html', {"message": "Something went wrong. Please logout and login again!"})
+		try:
+			user = User()
+			user.userid = content['id']
+			user.firstname = content['first_name']
+			user.lastname = content['last_name']
+			user.email = content['email']
+			user.birthday = datetime.strptime(content['birthday'], '%m/%d/%Y')
+			user.gender = content['gender'] 
+			user.access_token = access_token
+			user.save()	
+		except:
+			return render(request, 'polls/error.html', {"message": "Error saving user data to database!"})
+	try:
+		places = store_tagged_places(user)
+	except:
+		return render(request, 'polls/error.html', {"message": "Error getting user data from facebook!"})
+		
+	return render(request, 'polls/detail.html', {"user": places['data'][0]['id'], "access": user.birthday})
 
 def vote(request, question_id):
 	return HttpResponse("You're voting on question %s." % question_id)
