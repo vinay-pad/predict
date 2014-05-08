@@ -64,11 +64,11 @@ def register(request):
 		except:
 			return render(request, 'polls/error.html', {"message": "Error saving user data to database!"})
 	try:
-		places = store_tagged_places(user)
+		res = store_tagged_places(user)
 	except:
 		return render(request, 'polls/error.html', {"message": "Error getting user data from facebook!"})
 		
-	return render(request, 'polls/detail.html', {"user": places['data'][0]['id'], "access": user.birthday})
+	return render(request, 'polls/detail.html', {"user": res['success'], "access": user.userid})
 
 def vote(request, question_id):
 	return HttpResponse("You're voting on question %s." % question_id)
