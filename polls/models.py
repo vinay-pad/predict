@@ -15,9 +15,10 @@ class User(models.Model):
 	email = models.EmailField(max_length=254)
 	birthday = models.DateTimeField()
 	gender = models.CharField(max_length=20)
+	access_token = models.TextField()	
 	
 	def __unicode__(self):
-		return self.question_text
+		return self.firstname+" "+self.lastname
 	
 class TaggedLocation(models.Model):
 	city = models.CharField(max_length=200, blank=True)
@@ -25,18 +26,27 @@ class TaggedLocation(models.Model):
 	state = models.CharField(max_length=100)
 	street = models.CharField(max_length=300)
 	place_zip = models.CharField(max_length=10)	
-	latitude = models.DecimalField(max_digits=13, decimal_places=12, default=Decimal('0.00'))
-	longitude = models.DecimalField(max_digits=13, decimal_places=12, default=Decimal('0.00'))
+	latitude = models.DecimalField(max_digits=12, decimal_places=9, blank=True, null=True)
+	longitude = models.DecimalField(max_digits=12, decimal_places=9, blank=True, null=True)
+	
+	def __unicode__(self):
+		return self.city
 
 class TaggedPlace(models.Model):
 	place_id = models.CharField(max_length=200)
 	name = models.CharField(max_length=500)
 	location = models.ForeignKey(TaggedLocation)
 
+	def __unicode__(self):
+		return self.name
+
 class TaggedInstance(models.Model):
 	user = models.ForeignKey(User)
 	instance_id = models.CharField(max_length=200)
 	place = models.ForeignKey(TaggedPlace)
+	
+	def __unicode__(self):
+		return self.place.name
 
 
 	

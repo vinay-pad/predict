@@ -63,10 +63,10 @@ def register(request):
 			user.save()	
 		except:
 			return render(request, 'polls/error.html', {"message": "Error saving user data to database!"})
-	try:
-		res = store_tagged_places(user)
-	except:
-		return render(request, 'polls/error.html', {"message": "Error getting user data from facebook!"})
+		try:
+			res = store_tagged_places(user)
+		except:
+			return render(request, 'polls/error.html', {"message": "Error getting user data from facebook!"})
 		
 	return render(request, 'polls/detail.html', {"user": res['success'], "access": user.userid})
 
