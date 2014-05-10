@@ -1,4 +1,5 @@
 import json
+import logging
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth import authenticate
@@ -11,9 +12,14 @@ import urllib2
 
 from polls.models import User
 from polls.places import store_tagged_places
+from polls.user_stats import get_user_most_tagged_places
 
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 def index(request):
+	logger.error("Loading logging form")
 	return render(request, 'polls/login_form.html')
 
 def login(request):
@@ -30,6 +36,7 @@ def login(request):
 			if user.is_active:
 				response_data['result'] = 'success'
 	except:
+		logger.exception("Unexpected error: ", sys.exc_info()[0])
 		response_data['result'] = 'failed'
 		
 	return HttpResponse(json.dumps(response_data), content_type="application/json")
@@ -38,7 +45,8 @@ def login(request):
 def register(request):
 	userid = request.POST['user']
 	access_token = request.POST['access_token']
-	
+	res = {}
+	res['success'] = False
 	if  userid and access_token:
 		#Now use the access token to get the user information from graph api
 		http_obj = httplib2.Http()	
@@ -54,21 +62,33 @@ def register(request):
 		try:
 			user = User()
 			user.userid = content['id']
-			user.firstname = content['first_name']
-			user.lastname = content['last_name']
-			user.email = content['email']
-			user.birthday = datetime.strptime(content['birthday'], '%m/%d/%Y')
-			user.gender = content['gender'] 
+			user.firstname = content['first_name'] if 'first_name' in content else None
+			user.lastname = content['last_name'] if 'last_name' in content else None
+			user.email = content['email'] if 'email' in content else None
+			user.birthday = datetime.strptime(content['birthday'], '%m/%d/%Y') if 'birthday' in content else None
+			user.gender = content['gender']  if 'gender' in content else None
 			user.access_token = access_token
 			user.save()	
 		except:
+			logger.exception("Unexpected error while saving user: ", sys.exc_info()[0])
 			return render(request, 'polls/error.html', {"message": "Error saving user data to database!"})
 		try:
 			res = store_tagged_places(user)
 		except:
+			logger.exception("Unexpected error while user's tagged places: ", sys.exc_info()[0])
 			return render(request, 'polls/error.html', {"message": "Error getting user data from facebook!"})
-		
-	return render(request, 'polls/detail.html', {"user": res['success'], "access": user.userid})
+	res['user'] = user.userid
+
+	return HttpResponse(json.dumps(res), content_type="application/json")		
+
+def get_top_tagged_places(request):
+	"""
+		Method to get the user's most tagged places
+	"""
+	userid = request.POST['userid']
+	res = get_user_most_tagged_places(userid)
+	
+	return render(request, 'polls/most_tagged.html', {"places": res})
 
 def vote(request, question_id):
 	return HttpResponse("You're voting on question %s." % question_id)

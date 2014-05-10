@@ -14,34 +14,36 @@
   <!--[if lt IE 9]><script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 	<script>
 $(document).ready(function() {
-  $.getScript('//connect.facebook.net/en_UK/all.js', function(){
-		var csrftoken = $.cookie('csrftoken');
-		function csrfSafeMethod(method) {
-		// these HTTP methods do not require CSRF protection
-		return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-		}
-
-		$.ajaxSetup({
-			crossDomain: false, // obviates need for sameOrigin test
-			beforeSend: function(xhr, settings) {
-				if (!csrfSafeMethod(settings.type)) {
-					xhr.setRequestHeader("X-CSRFToken", csrftoken);
-				}
-			}
-		});
-
 		function fb_login(){
 			FB.login(function(response) {
 				if (response.status === 'connected') {
 				// Logged into your app and Facebook.
-					$.post( "polls/register/", { user: response.authResponse.userID, access_token: response.authResponse.accessToken } );
+					//$.post( "polls/register/", { user: response.authResponse.userID, access_token: response.authResponse.accessToken});
+						
+					$.ajax({
+						url : "polls/register/",
+						type: "POST",
+						data : {user: response.authResponse.userID, 
+								access_token: response.authResponse.accessToken, 
+								csrfmiddlewaretoken: '{{ csrf_token }}'},
+						dataType : "json",
+						success: function( data ){
+							$.ajax({
+                        	url : "polls/get_top_tagged/",
+                        	type: "POST",
+							data : {userid: data['user'], csrfmiddlewaretoken: '{{ csrf_token }}'},
+							success: function(res){
+							}
+							});
+						}
+					});
 				} else if (response.status === 'not_authorized') {
 				// The person is logged into Facebook, but not your app.
 				} else {
 				// The person is not logged into Facebook, so we're not sure if
 				// they are logged into this app or not.
 				}
-			}, {scope: 'user_tagged_places,user_events,user_photos'});
+			}, {scope: 'email,public_profile,user_friends,user_tagged_places,user_events'});
 		}
 
 		function fb_logout(){
@@ -76,7 +78,6 @@ $(document).ready(function() {
 			$('#fb_logout').click(function() {
 				fb_logout();
 			});
-		});
 });
 	</script>
 </head>

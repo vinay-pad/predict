@@ -9,11 +9,11 @@ from decimal import Decimal
 # Register your models here.
 
 class User(models.Model):
-	userid = models.CharField(max_length=200, unique=True)
+	userid = models.CharField(max_length=200, primary_key=True)
 	firstname = models.CharField(max_length=200)
 	lastname = models.CharField(max_length=200)
 	email = models.EmailField(max_length=254)
-	birthday = models.DateTimeField()
+	birthday = models.DateTimeField(null=True)
 	gender = models.CharField(max_length=20)
 	access_token = models.TextField()	
 	
@@ -30,10 +30,10 @@ class TaggedLocation(models.Model):
 	longitude = models.DecimalField(max_digits=12, decimal_places=9, blank=True, null=True)
 	
 	def __unicode__(self):
-		return self.city
+		return self.city+" "+self.state+" lat: "+str(self.latitude)+" long: "+str(self.longitude)
 
 class TaggedPlace(models.Model):
-	place_id = models.CharField(max_length=200)
+	place_id = models.CharField(max_length=200, primary_key=True)
 	name = models.CharField(max_length=500)
 	location = models.ForeignKey(TaggedLocation)
 
@@ -42,7 +42,7 @@ class TaggedPlace(models.Model):
 
 class TaggedInstance(models.Model):
 	user = models.ForeignKey(User)
-	instance_id = models.CharField(max_length=200)
+	instance_id = models.CharField(max_length=200, primary_key=True)
 	place = models.ForeignKey(TaggedPlace)
 	
 	def __unicode__(self):
