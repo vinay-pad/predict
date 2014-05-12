@@ -1,8 +1,12 @@
 import httplib2
 import urllib2
 import json
+import logging
 
 from polls.models import TaggedLocation, TaggedPlace, TaggedInstance
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 def store_tagged_places(user):
 	"""
@@ -10,12 +14,13 @@ def store_tagged_places(user):
 	"""
 	res = {}
 	try:
+		logger.debug("Getting tagges places for user "+user.firstname+" "+user.lastname)
 		http_obj = httplib2.Http()	
 		resp2, tagged_places = http_obj.request("https://graph.facebook.com/"+user.userid+"/tagged_places/"+"?limit=500&access_token="+user.access_token, method="GET")
 		tagged_places = json.loads(tagged_places)	
+		logger.debug("Tagged places for user "+user.firstname+" :"+str(tagged_places))
 	except:
-		res['success'] = False
-		return res
+		raise
 	
 	#For each tagged instance create a taggedInstance, taggedPlace and taggedLocation instance
 	for entry in tagged_places['data']:

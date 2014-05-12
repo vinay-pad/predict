@@ -14,7 +14,10 @@
   <!--[if lt IE 9]><script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 	<script>
 $(document).ready(function() {
+
+		 var permsNeeded = ['email'];
 		function fb_login(){
+	
 			FB.login(function(response) {
 				if (response.status === 'connected') {
 				// Logged into your app and Facebook.
@@ -43,7 +46,7 @@ $(document).ready(function() {
 				// The person is not logged into Facebook, so we're not sure if
 				// they are logged into this app or not.
 				}
-			}, {scope: 'email,public_profile,user_friends,user_tagged_places,user_events'});
+			}, {scope: permsNeeded.join(',')});
 		}
 
 		function fb_logout(){

@@ -1,5 +1,6 @@
 import json
 import logging
+import sys
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth import authenticate
@@ -53,6 +54,7 @@ def register(request):
 		try:
 			resp, content = http_obj.request("https://graph.facebook.com/"+userid+"?access_token="+access_token, method="GET")
 			content = json.loads(content)	
+			logger.debug("Content: ", content)
 		except:
 			return render(request, 'polls/error.html', {"message": "Something went wrong. Please logout and login again!"})
 
