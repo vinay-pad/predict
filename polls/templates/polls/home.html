@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]> <html class="lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]> <html class="lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="en"> <!--<![endif]-->
+<head>
+  	<meta charset="utf-8">
+  	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  	<title>Home page</title>
+  	<link rel="stylesheet" href="/static/polls/css/style.css">
+  	<link rel="stylesheet" href="/static/polls/css/semantic.min.css">
+  	<script type="text/javascript" src="/static/polls/js/jquery-1.10.2.min.js"></script>
+  	<script type="text/javascript" src="/static/polls/js/jquery.cookie.js"></script>
+  <!--[if lt IE 9]><script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script>
+		function fb_logout(){
+			 FB.logout(function(){document.location.reload();});
+		}
+
+		function get_top_tagged_places(){
+			//Check if user is logged in
+			FB.getLoginStatus(function(response) {
+				if (response.status === 'connected') {
+					//Get the top tagged user places
+					$.ajax({
+						url : "get_top_tagged_places/",
+						type: "POST",
+						data : {user: response.authResponse.userID, 
+								access_token: response.authResponse.accessToken, 
+								csrfmiddlewaretoken: '{{ csrf_token }}'},
+						success: function( data ){
+							if (data.valid){
+								load_top_tagged_places_results();
+							}
+							else{
+								//Load an error message
+							}
+						}
+					});
+				}
+				else{
+					//Load the login page
+					
+				}
+			});
+		}
+
+		window.fbAsyncInit = function() {
+			FB.init({
+				appId      : '688488047882848',
+				cookie     : true,  // enable cookies to allow the server to access 
+									// the session
+				xfbml      : true,  // parse social plugins on this page
+				version    : 'v2.0' // use version 2.0
+			});
+			
+			/*First fetch user data*/
+			FB.getLoginStatus(function(response) {
+				if (response.status === 'connected') {
+					$("fetch_user_data_loader").addClass('dimmer');
+					$.ajax({
+						url : "retrieve_tagged_places/",
+						type: "POST",
+						data : {user: response.authResponse.userID, 
+								access_token: response.authResponse.accessToken, 
+								csrfmiddlewaretoken: '{{ csrf_token }}'},
+						dataType : "json",
+						success: function( data ){
+							if (data.valid){
+								//Hide the loader
+								alert('hide');
+								$("fetch_user_data_loader").removeClass();
+							}
+							else{
+								//Load an error message
+								alert('error!!');
+							}
+						}
+					});
+				}
+			});
+		};
+
+		// Load the SDK asynchronously
+		(function(d, s, id) {
+		var js, fjs = d.getElementsByTagName(s)[0];
+		if (d.getElementById(id)) return;
+		js = d.createElement(s); js.id = id;
+		js.src = "//connect.facebook.net/en_US/sdk.js";
+		fjs.parentNode.insertBefore(js, fjs);
+		}(document, 'script', 'facebook-jssdk'));
+
+		$(document).ready(function() {
+			$('#get_top_tagged').click(function() {
+				get_top_tagged_places();
+			});
+			
+			$('#fb_logout').click(function() {
+				fb_logout();
+			});
+		});
+	</script>
+</head>
+<body>
+	<div id="fetch_user_data_loader" class="ui active inverted">
+    	<div class="ui text loader">Loading user data</div>
+  	</div>
+	<div id="get_top_tagged">
+		<a class="ui green button">Get top tagged places</a>
+	</div>
+	<div id="fb_logout" class="negative ui button fb_logout">Logout</div>
+</body>
+</html>

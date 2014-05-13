@@ -13,57 +13,54 @@
   	<script type="text/javascript" src="/static/polls/js/jquery.cookie.js"></script>
   <!--[if lt IE 9]><script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 	<script>
-$(document).ready(function() {
-
-		 var permsNeeded = ['email'];
-		function fb_login(){
-	
-			FB.login(function(response) {
-				if (response.status === 'connected') {
-				// Logged into your app and Facebook.
-					//$.post( "polls/register/", { user: response.authResponse.userID, access_token: response.authResponse.accessToken});
-						
-					$.ajax({
-						url : "polls/register/",
-						type: "POST",
-						data : {user: response.authResponse.userID, 
-								access_token: response.authResponse.accessToken, 
-								csrfmiddlewaretoken: '{{ csrf_token }}'},
-						dataType : "json",
-						success: function( data ){
-							$.ajax({
-                        	url : "polls/get_top_tagged/",
-                        	type: "POST",
-							data : {userid: data['user'], csrfmiddlewaretoken: '{{ csrf_token }}'},
-							success: function(res){
+		$(document).ready(function() {
+			var permsNeeded = ['email'];
+			function fb_login(){
+				FB.login(function(response) {
+					if (response.status === 'connected') {
+						$.ajax({
+							url : "polls/register/",
+							type: "POST",
+							data : {user: response.authResponse.userID, 
+									access_token: response.authResponse.accessToken, 
+									csrfmiddlewaretoken: '{{ csrf_token }}'},
+							dataType : "json",
+							success: function( data ){
+								if (data.valid){
+									window.location.href = 'polls/home';
+								}
 							}
-							});
-						}
-					});
-				} else if (response.status === 'not_authorized') {
-				// The person is logged into Facebook, but not your app.
-				} else {
-				// The person is not logged into Facebook, so we're not sure if
-				// they are logged into this app or not.
-				}
-			}, {scope: permsNeeded.join(',')});
-		}
+						});
+					} else if (response.status === 'not_authorized') {
+					// The person is logged into Facebook, but not your app.
+					} else {
+					// The person is not logged into Facebook, so we're not sure if
+					// they are logged into this app or not.
+					}
+				}, {scope: permsNeeded.join(',')});
+			}
 
-		function fb_logout(){
-			 FB.logout(function(){document.location.reload();});
-		}
-		window.fbAsyncInit = function() {
-			FB.init({
-				appId      : '688488047882848',
-				cookie     : true,  // enable cookies to allow the server to access 
-									// the session
-				xfbml      : true,  // parse social plugins on this page
-				version    : 'v2.0' // use version 2.0
-			});
+			window.fbAsyncInit = function() {
+				FB.init({
+					appId      : '688488047882848',
+					cookie     : true,  // enable cookies to allow the server to access 
+										// the session
+					xfbml      : true,  // parse social plugins on this page
+					version    : 'v2.0' // use version 2.0
+				});
 
-
-
-		};
+				//Check if user is logged in
+				FB.getLoginStatus(function(response) {
+					if (response.status === 'connected') {
+						//Load the logged in page.
+						window.location.href = 'polls/home';
+					}
+					else{
+						//Load the login page
+						//window.location.href = '/login';
+					}
+				});
+			};
 
 		  // Load the SDK asynchronously
 		  (function(d, s, id) {
@@ -74,14 +71,11 @@ $(document).ready(function() {
 			fjs.parentNode.insertBefore(js, fjs);
 		  }(document, 'script', 'facebook-jssdk'));
 
-			$('#fb_button').click(function() {
-				fb_login();
-			});
+		$('#fb_button').click(function() {
+			fb_login();
+		});
 
-			$('#fb_logout').click(function() {
-				fb_logout();
-			});
-});
+		});
 	</script>
 </head>
 <body>
@@ -90,7 +84,6 @@ $(document).ready(function() {
   		<i class="facebook icon"></i>
   			Login to Facebook
 	</div>
-	<div id="fb_logout" class="negative ui button">Logout</div>
   </section>
 </body>
 </html>

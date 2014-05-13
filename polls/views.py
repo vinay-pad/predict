@@ -20,7 +20,7 @@ from polls.user_stats import get_user_most_tagged_places
 logger = logging.getLogger(__name__)
 
 def index(request):
-	logger.error("Loading logging form")
+	logger.info("Loading login page")
 	return render(request, 'polls/login_form.html')
 
 def login(request):
@@ -42,12 +42,11 @@ def login(request):
 		
 	return HttpResponse(json.dumps(response_data), content_type="application/json")
 
-@csrf_protect
 def register(request):
 	userid = request.POST['user']
 	access_token = request.POST['access_token']
 	res = {}
-	res['success'] = False
+	res['valid'] = False
 	if  userid and access_token:
 		#Now use the access token to get the user information from graph api
 		http_obj = httplib2.Http()	
@@ -59,7 +58,7 @@ def register(request):
 			return render(request, 'polls/error.html', {"message": "Something went wrong. Please logout and login again!"})
 
 		#confirm userid is equal to id returned from graph api
-		if userid != content['id']:
+		if 'id' not in content or userid != content['id']:
 			return render(request, 'polls/error.html', {"message": "Something went wrong. Please logout and login again!"})
 		try:
 			user = User()
@@ -73,24 +72,43 @@ def register(request):
 			user.save()	
 		except:
 			logger.exception("Unexpected error while saving user: ", sys.exc_info()[0])
-			return render(request, 'polls/error.html', {"message": "Error saving user data to database!"})
-		try:
-			res = store_tagged_places(user)
-		except:
-			logger.exception("Unexpected error while user's tagged places: ", sys.exc_info()[0])
-			return render(request, 'polls/error.html', {"message": "Error getting user data from facebook!"})
-	res['user'] = user.userid
+			return HttpResponse(json.dumps(res), content_type="application/json")		
+
+	res['valid'] = True	
+	return HttpResponse(json.dumps(res), content_type="application/json")		
+
+def retrieve_tagged_places(request):
+	userid = request.POST['user']
+	access_token = request.POST['access_token']
+	res = {}
+	res['valid'] = False
+	try:
+		user = User.objects.filter(userid=userid)[0]
+	except:
+		res['valid'] = False
+		res['msg'] = 'Exception while retrieving user '+str(sys.exc_info()[0])
+		logger.exception("Unexpected error while user: ", sys.exc_info()[0])
+		return HttpResponse(json.dumps(res), content_type="application/json")		
+
+	try:
+		res = store_tagged_places(user)
+	except:
+		res['valid'] = False
+		res['msg'] = 'Exception while retrieving user data '+str(sys.exc_info()[0])
+		logger.exception("Unexpected error while user's tagged places: ", sys.exc_info()[0])
+		return HttpResponse(json.dumps(res), content_type="application/json")		
 
 	return HttpResponse(json.dumps(res), content_type="application/json")		
 
+def	home(request):
+	logger.info("Loading home page")
+	return render(request, 'polls/home.html')
+	 
 def get_top_tagged_places(request):
 	"""
 		Method to get the user's most tagged places
 	"""
-	userid = request.POST['userid']
+	userid = request.POST['user']
 	res = get_user_most_tagged_places(userid)
 	
-	return render(request, 'polls/most_tagged.html', {"places": res})
-
-def vote(request, question_id):
-	return HttpResponse("You're voting on question %s." % question_id)
+	return render(request, 'polls/most_tagged.html', {"places": str(res)})

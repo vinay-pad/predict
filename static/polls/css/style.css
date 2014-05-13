@@ -413,3 +413,9 @@ label[for='toggle-all'] {
 .hidden{
 	display:none;
 }
+
+.fb_logout{
+	position: absolute;
+	top: 30px;
+	right:30px;
+}
