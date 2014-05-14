@@ -52,6 +52,8 @@ def store_tagged_places(user):
 			tagged_instance.save()
 			
 			res['valid'] = True
+	except KeyError:
+		logger.exception("A key error occured")
 	except:
 		res['valid'] = False
 		res['msg'] = 'Exception iterating over user results '+str(sys.exc_info()[0])

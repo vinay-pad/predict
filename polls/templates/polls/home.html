@@ -13,11 +13,20 @@
   	<script type="text/javascript" src="/static/polls/js/jquery.cookie.js"></script>
   <!--[if lt IE 9]><script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 	<script>
+		
+		function load_top_tagged_places_results(data){
+			$("#get_top_tagged").hide();
+			$.each(data, function(k, v) {
+				//TODO: remove this and put all this in a table
+				alert(v.name);
+			});
+		}
 		function fb_logout(){
 			 FB.logout(function(){document.location.reload();});
 		}
 
 		function get_top_tagged_places(){
+			$("#get_top_tagged_loader").addClass('dimmer');
 			//Check if user is logged in
 			FB.getLoginStatus(function(response) {
 				if (response.status === 'connected') {
@@ -28,9 +37,10 @@
 						data : {user: response.authResponse.userID, 
 								access_token: response.authResponse.accessToken, 
 								csrfmiddlewaretoken: '{{ csrf_token }}'},
-						success: function( data ){
-							if (data.valid){
-								load_top_tagged_places_results();
+						success: function(res){
+							if (res.valid){
+								$("#get_top_tagged_loader").removeClass('dimmer');
+								load_top_tagged_places_results(res.data);
 							}
 							else{
 								//Load an error message
@@ -68,8 +78,7 @@
 						success: function( data ){
 							if (data.valid){
 								//Hide the loader
-								alert('hide');
-								$("fetch_user_data_loader").removeClass();
+								$("#fetch_user_data_loader").removeClass('dimmer');
 							}
 							else{
 								//Load an error message
@@ -77,6 +86,9 @@
 							}
 						}
 					});
+				}
+				else{
+					window.location.href = '/';
 				}
 			});
 		};
@@ -102,8 +114,11 @@
 	</script>
 </head>
 <body>
-	<div id="fetch_user_data_loader" class="ui active inverted">
+	<div id="fetch_user_data_loader" class="ui active inverted dimmer">
     	<div class="ui text loader">Loading user data</div>
+  	</div>
+	<div id="get_top_tagged_loader" class="ui active inverted">
+    	<div class="ui text loader">Fetchng user top tagged places</div>
   	</div>
 	<div id="get_top_tagged">
 		<a class="ui green button">Get top tagged places</a>

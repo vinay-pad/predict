@@ -19,7 +19,10 @@ def get_user_most_tagged_places(userid):
 	tagged_places = TaggedPlace.objects.filter(place_id__in=place_ids).annotate(num=Count('taggedinstance')).order_by('-num')
 
 	for place in tagged_places:
+		entry = {}
 		logger.debug("Got place\n", place)
-		res.append((place.name, place.place_id))
+		entry['name'] = place.name
+		entry['id'] = place.place_id
+		res.append(entry)
 	
 	return res

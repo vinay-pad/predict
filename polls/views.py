@@ -42,6 +42,19 @@ def login(request):
 		
 	return HttpResponse(json.dumps(response_data), content_type="application/json")
 
+def	home(request):
+	logger.info("Loading home page")
+	access_token = request.GET.get('access_token')
+	userid = request.GET.get('userid')
+
+	#Update the access token for the user in the database
+	user = User.objects.filter(userid=userid)
+	logger.debug('Got user '+str(user)+' for userid '+str(userid)+str(access_token))
+	if user:
+		user[0].access_token = access_token
+		user[0].save()
+	return render(request, 'polls/home.html')
+	 
 def register(request):
 	userid = request.POST['user']
 	access_token = request.POST['access_token']
@@ -100,15 +113,18 @@ def retrieve_tagged_places(request):
 
 	return HttpResponse(json.dumps(res), content_type="application/json")		
 
-def	home(request):
-	logger.info("Loading home page")
-	return render(request, 'polls/home.html')
-	 
 def get_top_tagged_places(request):
 	"""
 		Method to get the user's most tagged places
 	"""
+	res = {}
 	userid = request.POST['user']
-	res = get_user_most_tagged_places(userid)
-	
-	return render(request, 'polls/most_tagged.html', {"places": str(res)})
+	try:
+		res['data'] = get_user_most_tagged_places(userid)
+	except:
+		logger.exception("Exception while getting user top tagged places")
+		res['valid'] = False	
+		res['data'] = None
+		return HttpResponse(json.dumps(res), content_type="application/json")		
+	res['valid'] = True
+	return HttpResponse(json.dumps(res), content_type="application/json")		
