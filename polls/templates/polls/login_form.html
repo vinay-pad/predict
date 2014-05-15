@@ -14,7 +14,7 @@
   <!--[if lt IE 9]><script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 	<script>
 		$(document).ready(function() {
-			var permsNeeded = ['email'];
+			var permsNeeded = ['email,user_tagged_places'];
 			function fb_login(){
 				FB.login(function(response) {
 					if (response.status === 'connected') {
@@ -79,12 +79,12 @@
 	</script>
 </head>
 <body>
-  <section class="container">
-	<div id="fb_button" class="ui vk button">
+<div class="login_bg">
+	<div id="fb_button" class="ui twitter button fb_login_button">
   		<i class="facebook icon"></i>
-  			Login to Facebook
+  			Sign in using Facebook
 	</div>
-  </section>
+</div>
 </body>
 </html>
 

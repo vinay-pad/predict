@@ -15,11 +15,14 @@
 	<script>
 		
 		function load_top_tagged_places_results(data){
-			$("#get_top_tagged").hide();
+			var txt = "";
 			$.each(data, function(k, v) {
-				//TODO: remove this and put all this in a table
-				alert(v.name);
+				txt += "<tr><td>"+v.name+"</td><td>"+v.city+"</td><td>"+v.street+"</td><td>"+v.country+"</td></tr>";
 			});
+			if(txt != ""){
+				$("#top_places_table").append(txt);
+				$("#top_places_div").removeClass("hidden");
+			} 
 		}
 		function fb_logout(){
 			 FB.logout(function(){document.location.reload();});
@@ -120,9 +123,40 @@
 	<div id="get_top_tagged_loader" class="ui active inverted">
     	<div class="ui text loader">Fetchng user top tagged places</div>
   	</div>
-	<div id="get_top_tagged">
-		<a class="ui green button">Get top tagged places</a>
+
+	<div class="ui vertical menu">
+	  <a id="get_top_tagged" class="active teal item">
+		Get top tagged places
+		<div class="ui teal label"></div>
+	  </a>
+	  <a class="item">
+		Not yet implemented
+		<div class="ui label"></div>
+	  </a>
+	  <a class="item">
+		Not yet implemented
+		<div class="ui label"></div>
+	  </a>
+	  <div class="item">
+		<div class="ui small icon input">
+		  <input type="text" placeholder="Search">
+		  <i class="search icon"></i>
+		</div>
+	  </div>
 	</div>
+
 	<div id="fb_logout" class="negative ui button fb_logout">Logout</div>
+
+	<div id="top_places_div" class="top_places_table hidden">
+		<div class="ui red ribbon label">Top 10 places you hangout at!</div>
+		<table id="top_places_table" class="ui small table segment">
+		<tr>
+			<th>Name</th>
+			<th>city</th>
+			<th>street</th>
+			<th>country</th>
+		</tr>
+	</div>
+</table>
 </body>
 </html>

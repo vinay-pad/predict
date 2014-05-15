@@ -419,3 +419,39 @@ label[for='toggle-all'] {
 	top: 30px;
 	right:30px;
 }
+
+.sidebar{
+	position: absolute;
+	left: 335px;
+	top: 0px;
+}
+
+body > div.ui.vertical.menu {
+	position: absolute;
+	left: 10px;
+	top: 0px;
+}
+
+.top_places_table{
+	position: absolute;
+	top: 75px;
+}
+
+.login_bg{
+	background:url(Terraced_houses.jpg);
+	background-size: 586px 380px
+	background-repeat:no-repeat;
+	height: 380px;
+	width: 586px;
+	position: absolute;
+	left: 340px;
+	bottom: 140px;
+	
+}
+
+#fb_button{
+	margin-left: 100px;
+	position: relative;
+	top: 200px;
+	left: 47px;
+}
