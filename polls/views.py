@@ -7,13 +7,12 @@ from django.contrib.auth import authenticate
 from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_protect
-from datetime import datetime
 import httplib2
 import urllib2
 
-from polls.models import User
 from polls.places import store_tagged_places
 from polls.user_stats import get_user_most_tagged_places
+from polls.dao.base_dao import save_fb_user, fetch_fb_user
 
 
 # Get an instance of a logger
@@ -48,11 +47,11 @@ def	home(request):
 	userid = request.GET.get('userid')
 
 	#Update the access token for the user in the database
-	user = User.objects.filter(userid=userid)
+	user = fetch_fb_user(userid)
 	logger.debug('Got user '+str(user)+' for userid '+str(userid)+str(access_token))
 	if user:
-		user[0].access_token = access_token
-		user[0].save()
+		user.access_token = access_token
+		user.save()
 	return render(request, 'polls/home.html')
 	 
 def register(request):
@@ -64,30 +63,26 @@ def register(request):
 		#Now use the access token to get the user information from graph api
 		http_obj = httplib2.Http()	
 		try:
+			logger.debug("eeRegistering user "+str(userid)+" "+str(access_token))
 			resp, content = http_obj.request("https://graph.facebook.com/"+userid+"?access_token="+access_token, method="GET")
 			content = json.loads(content)	
-			logger.debug("Content: ", content)
+			logger.debug("Content: "+str(content))
 		except:
 			return render(request, 'polls/error.html', {"message": "Something went wrong. Please logout and login again!"})
 
+		logger.debug("Checking userid")
 		#confirm userid is equal to id returned from graph api
 		if 'id' not in content or userid != content['id']:
 			return render(request, 'polls/error.html', {"message": "Something went wrong. Please logout and login again!"})
-		try:
-			user = User()
-			user.userid = content['id']
-			user.firstname = content['first_name'] if 'first_name' in content else None
-			user.lastname = content['last_name'] if 'last_name' in content else None
-			user.email = content['email'] if 'email' in content else None
-			user.birthday = datetime.strptime(content['birthday'], '%m/%d/%Y') if 'birthday' in content else None
-			user.gender = content['gender']  if 'gender' in content else None
-			user.access_token = access_token
-			user.save()	
-		except:
-			logger.exception("Unexpected error while saving user: ", sys.exc_info()[0])
-			return HttpResponse(json.dumps(res), content_type="application/json")		
+		content['access_token'] = access_token
+		logger.debug("Trying to save user")
+		#try:
+		res = save_fb_user(content)
+		logger.debug("Saved user info succesfully"+str(res))
+		#except:
+			#logger.exception("Unexpected error while saving user: ", sys.exc_info()[0])
+			#return HttpResponse(json.dumps(res), content_type="application/json")		
 
-	res['valid'] = True	
 	return HttpResponse(json.dumps(res), content_type="application/json")		
 
 def retrieve_tagged_places(request):
@@ -96,7 +91,7 @@ def retrieve_tagged_places(request):
 	res = {}
 	res['valid'] = False
 	try:
-		user = User.objects.filter(userid=userid)[0]
+		user = fetch_fb_user(userid)
 	except:
 		res['valid'] = False
 		res['msg'] = 'Exception while retrieving user '+str(sys.exc_info()[0])

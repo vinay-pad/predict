@@ -6,20 +6,7 @@ from django.db import models
 from decimal import Decimal
 
 
-# Register your models here.
 
-class User(models.Model):
-	userid = models.CharField(max_length=200, primary_key=True)
-	firstname = models.CharField(max_length=200)
-	lastname = models.CharField(max_length=200)
-	email = models.EmailField(max_length=254)
-	birthday = models.DateTimeField(null=True)
-	gender = models.CharField(max_length=20)
-	access_token = models.TextField()	
-	
-	def __unicode__(self):
-		return self.firstname+" "+self.lastname
-	
 class TaggedLocation(models.Model):
 	city = models.CharField(max_length=200, blank=True)
 	country = models.CharField(max_length=30)	
@@ -31,6 +18,32 @@ class TaggedLocation(models.Model):
 	
 	def __unicode__(self):
 		return self.city+" "+self.state+" lat: "+str(self.latitude)+" long: "+str(self.longitude)
+
+class FBLocation(models.Model):
+	loc_id = models.CharField(max_length=200, primary_key=True)
+	name = models.TextField()
+	talking_about_count = models.BigIntegerField()
+	category = models.CharField(max_length=50) 
+	num_checkins = models.BigIntegerField()
+	category_list = []
+	description = models.TextField()
+	fb_page_link = models.TextField()
+	website = models.TextField()
+	were_here_count = models.BigIntegerField()
+	location = models.ForeignKey(TaggedLocation)
+
+class User(models.Model):
+	userid = models.CharField(max_length=200, primary_key=True)
+	firstname = models.CharField(max_length=200)
+	lastname = models.CharField(max_length=200)
+	email = models.EmailField(max_length=254)
+	birthday = models.DateTimeField(null=True)
+	gender = models.CharField(max_length=20)
+	location = models.ForeignKey(FBLocation)
+	access_token = models.TextField()	
+	
+	def __unicode__(self):
+		return self.firstname+" "+self.lastname
 
 class TaggedPlace(models.Model):
 	place_id = models.CharField(max_length=200, primary_key=True)

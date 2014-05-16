@@ -160,5 +160,10 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'polls.dao.base_dao': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     },
 }
