@@ -40,7 +40,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 	'polls',
-	'blog',
 	'django_facebook',
 )
 

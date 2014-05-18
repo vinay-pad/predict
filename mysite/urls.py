@@ -11,5 +11,4 @@ urlpatterns = patterns('',
     url(r'^login/', include('polls.urls', namespace="polls")),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^polls/', include('polls.urls', namespace="polls")),
-    url(r'^blog/', include('blog.urls')),
 )
