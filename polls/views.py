@@ -59,7 +59,6 @@ def register(request):
 	access_token = request.POST['access_token']
 	res = {}
 	res['valid'] = False
-	import pdb; pdb.set_trace();
 	if  userid and access_token:
 		#Now use the access token to get the user information from graph api
 		http_obj = httplib2.Http()	
