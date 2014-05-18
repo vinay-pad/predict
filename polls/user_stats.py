@@ -43,7 +43,6 @@ def get_user_most_tagged_places(userid):
 
 	#Get the top 10 tagged places
 	top_place_ids = most_common(place_ids, 10)
-	import pdb; pdb.set_trace()
 	for top_place in top_place_ids:
 		place = TaggedPlace.objects.get(place_id=top_place[0])
 		entry = {}
