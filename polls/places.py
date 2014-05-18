@@ -27,17 +27,22 @@ def store_tagged_places(user):
 	try:	
 		#For each tagged instance create a taggedInstance, taggedPlace and taggedLocation instance
 		for entry in tagged_places['data']:
-			tagged_location = TaggedLocation()
-			tagged_location.city = entry['place']['location']['city'] if 'city' in entry['place']['location'] else ''
-			tagged_location.country = entry['place']['location']['country'] if 'country' in entry['place']['location'] else ''
-			if 'latitude' in entry['place']['location']:
-				tagged_location.latitude =  str(entry['place']['location']['latitude'])
-			if 'longitude' in entry['place']['location']:
-				tagged_location.longitude =  str(entry['place']['location']['longitude'])
-			tagged_location.state = entry['place']['location']['state'] if 'state' in entry['place']['location'] else ''
-			tagged_location.street = entry['place']['location']['street'] if 'street' in entry['place']['location'] else ''
-			tagged_location.place_zip = entry['place']['location']['zip'] if 'zip' in entry['place']['location'] else ''
-			tagged_location.save()
+			latitude = str(entry['place']['location']['latitude']) if 'latitude' in entry['place']['location'] else None
+			longitude = str(entry['place']['location']['longitude']) if 'longitude' in entry['place']['location'] else None
+			try:
+				tagged_location = TaggedLocation.objects.get(latitude=latitude, longitude=longitude)
+			except TaggedLocation.DoesNotExist:
+				tagged_location = TaggedLocation()
+				tagged_location.city = entry['place']['location']['city'] if 'city' in entry['place']['location'] else ''
+				tagged_location.country = entry['place']['location']['country'] if 'country' in entry['place']['location'] else ''
+				if latitude:
+					tagged_location.latitude =  latitude
+				if longitude:
+					tagged_location.longitude =  longitude
+				tagged_location.state = entry['place']['location']['state'] if 'state' in entry['place']['location'] else ''
+				tagged_location.street = entry['place']['location']['street'] if 'street' in entry['place']['location'] else ''
+				tagged_location.place_zip = entry['place']['location']['zip'] if 'zip' in entry['place']['location'] else ''
+				tagged_location.save()
 
 			tagged_place = TaggedPlace()
 			tagged_place.place_id = entry['place']['id']

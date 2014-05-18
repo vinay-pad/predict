@@ -112,9 +112,9 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/polls/detail/'
 LOGIN_ERROR_URL = '/login-error/'
 
-#STATICFILES_DIRS = (
- #   os.path.join(BASE_DIR, "static"),
-#)
+STATICFILES_DIRS = (
+	os.path.join(BASE_DIR, "static"),
+)
 
 FACEBOOK_APP_ID              = '688488047882848'
 FACEBOOK_API_SECRET          = 'ba89892196f2d6ecba6554d3358fe522'

@@ -18,7 +18,7 @@ class TaggedLocation(models.Model):
 	
 	def __unicode__(self):
 		return self.city+" "+self.state+" lat: "+str(self.latitude)+" long: "+str(self.longitude)
-
+	
 class FBLocation(models.Model):
 	loc_id = models.CharField(max_length=200, primary_key=True)
 	name = models.TextField()
@@ -30,7 +30,7 @@ class FBLocation(models.Model):
 	fb_page_link = models.TextField()
 	website = models.TextField()
 	were_here_count = models.BigIntegerField()
-	location = models.ForeignKey(TaggedLocation)
+	#location = models.ForeignKey(TaggedLocation)
 
 class User(models.Model):
 	userid = models.CharField(max_length=200, primary_key=True)
@@ -39,7 +39,7 @@ class User(models.Model):
 	email = models.EmailField(max_length=254)
 	birthday = models.DateTimeField(null=True)
 	gender = models.CharField(max_length=20)
-	location = models.ForeignKey(FBLocation)
+	location = models.ForeignKey(FBLocation, null=True)
 	access_token = models.TextField()	
 	
 	def __unicode__(self):

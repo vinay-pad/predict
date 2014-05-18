@@ -20,7 +20,7 @@ def get_user_most_tagged_places(userid):
 
 	for place in tagged_places:
 		entry = {}
-		logger.debug("Got place\n", place)
+		logger.debug("Got place "+str(place))
 		entry['name'] = place.name
 		entry['id'] = place.place_id
 		entry['city'] = place.location.city

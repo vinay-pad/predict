@@ -16,10 +16,13 @@
 		
 		function load_top_tagged_places_results(data){
 			var txt = "";
+			txt += "<tr><th>Name</th><th>City</th><th>Street</th><th>Country</th></tr>";
 			$.each(data, function(k, v) {
 				txt += "<tr><td>"+v.name+"</td><td>"+v.city+"</td><td>"+v.street+"</td><td>"+v.country+"</td></tr>";
 			});
 			if(txt != ""){
+				
+				$("#top_places_table").empty();
 				$("#top_places_table").append(txt);
 				$("#top_places_div").removeClass("hidden");
 			} 
@@ -150,13 +153,7 @@
 	<div id="top_places_div" class="top_places_table hidden">
 		<div class="ui red ribbon label">Top 10 places you hangout at!</div>
 		<table id="top_places_table" class="ui small table segment">
-		<tr>
-			<th>Name</th>
-			<th>city</th>
-			<th>street</th>
-			<th>country</th>
-		</tr>
+		</table>
 	</div>
-</table>
 </body>
 </html>

@@ -59,6 +59,7 @@ def register(request):
 	access_token = request.POST['access_token']
 	res = {}
 	res['valid'] = False
+	import pdb; pdb.set_trace();
 	if  userid and access_token:
 		#Now use the access token to get the user information from graph api
 		http_obj = httplib2.Http()	
@@ -76,12 +77,12 @@ def register(request):
 			return render(request, 'polls/error.html', {"message": "Something went wrong. Please logout and login again!"})
 		content['access_token'] = access_token
 		logger.debug("Trying to save user")
-		#try:
-		res = save_fb_user(content)
-		logger.debug("Saved user info succesfully"+str(res))
-		#except:
-			#logger.exception("Unexpected error while saving user: ", sys.exc_info()[0])
-			#return HttpResponse(json.dumps(res), content_type="application/json")		
+		try:
+			res = save_fb_user(content)
+			logger.debug("Saved user info succesfully"+str(res))
+		except:
+			logger.exception("Unexpected error while saving user: ", sys.exc_info()[0])
+			return HttpResponse(json.dumps(res), content_type="application/json")		
 
 	return HttpResponse(json.dumps(res), content_type="application/json")		
 
