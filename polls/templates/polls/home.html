@@ -55,11 +55,36 @@
 					});
 				}
 				else{
-					//Load the login page
-					
 				}
 			});
 		}
+
+		function get_top_friends(){
+			$("#get_top_tagged_loader").addClass('dimmer');
+			//Check if user is logged in
+			FB.getLoginStatus(function(response) {
+				if (response.status === 'connected') {
+					//Get the top tagged user places
+					$.ajax({
+						url : "fetch_top_friends/",
+						type: "POST",
+						data : {user: response.authResponse.userID, 
+								access_token: response.authResponse.accessToken, 
+								csrfmiddlewaretoken: '{{ csrf_token }}'},
+						success: function(res){
+							if (res.valid){
+								$("#get_top_tagged_loader").removeClass('dimmer');
+							}
+							else{
+								alert('Error fetching top friends');
+							}
+						}
+					});
+				}
+				else{
+				}
+			});
+		}	
 
 		window.fbAsyncInit = function() {
 			FB.init({
@@ -107,12 +132,27 @@
 		js.src = "//connect.facebook.net/en_US/sdk.js";
 		fjs.parentNode.insertBefore(js, fjs);
 		}(document, 'script', 'facebook-jssdk'));
-
+		
+		function make_active(id){
+			$('#get_top_tagged').removeClass('teal');	
+			$('#fetch_top_friends').removeClass('teal');	
+			
+			if (id != null){
+				$('#'.concat(id)).addClass('teal');	
+			}
+		}
 		$(document).ready(function() {
 			$('#get_top_tagged').click(function() {
+				make_active('get_top_tagged');
 				get_top_tagged_places();
 			});
 			
+			$('#fetch_top_friends').click(function() {
+				make_active('fetch_top_friends');
+				get_top_friends();
+			});
+			
+			make_active(null);
 			$('#fb_logout').click(function() {
 				fb_logout();
 			});
@@ -132,8 +172,8 @@
 		Get top tagged places
 		<div class="ui teal label"></div>
 	  </a>
-	  <a class="item">
-		Not yet implemented
+	  <a id="fetch_top_friends" class="item">
+		Fetch top friends over past year
 		<div class="ui label"></div>
 	  </a>
 	  <a class="item">

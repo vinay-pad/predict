@@ -10,4 +10,5 @@ urlpatterns = patterns('',
 	url(r'^get_top_tagged', views.get_top_tagged_places, name='get_top_tagged_places'),
 	url(r'^home', views.home, name='homepage'),
 	url(r'^retrieve_tagged_places', views.retrieve_tagged_places, name='retreive_top_tagged'),
+	url(r'^fetch_top_friends', views.fetch_top_friends, name='fetch_top_friends'),
 )

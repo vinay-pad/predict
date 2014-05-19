@@ -11,7 +11,7 @@ import httplib2
 import urllib2
 
 from polls.places import store_tagged_places
-from polls.user_stats import get_user_most_tagged_places
+from polls.user_stats import get_user_most_tagged_places, get_user_top_friends
 from polls.dao.base_dao import save_fb_user, fetch_fb_user
 
 
@@ -122,4 +122,22 @@ def get_top_tagged_places(request):
 		res['data'] = None
 		return HttpResponse(json.dumps(res), content_type="application/json")		
 	res['valid'] = True
+	return HttpResponse(json.dumps(res), content_type="application/json")		
+
+def fetch_top_friends(request):
+	"""
+		Method to get the people this person has hung 
+		out with the most in the past year
+	"""
+	res = {}
+	userid = request.POST['user']
+	access_token = request.POST['access_token']
+	try:
+		res = get_user_top_friends(userid, access_token)
+	except:
+		res['valid'] = False
+		res['msg'] = 'Exception while retrieving user data '+str(sys.exc_info()[0])
+		logger.exception("Unexpected error while user's tagged places: ", sys.exc_info()[0])
+		return HttpResponse(json.dumps(res), content_type="application/json")		
+
 	return HttpResponse(json.dumps(res), content_type="application/json")		
