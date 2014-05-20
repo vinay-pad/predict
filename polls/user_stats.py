@@ -67,21 +67,23 @@ def get_user_top_friends(userid, access_token):
 
 	res = {}
 	res['data'] = []
-	try:
-		logger.debug("Getting top friends for user "+userid)
-		http_obj = httplib2.Http()	
-		resp2, feed = http_obj.request("https://graph.facebook.com/"+userid+"/feed/"+"?access_token="+access_token, method="GET")
-		feed = json.loads(feed)	
-		logger.debug("Tagged places for user "+userid)
-	except:
-		res['valid'] = False
-		res['msg'] = 'Error getting feed for the user'+userid
-		return res
 
 	try:	
 		#For each feed entry
 		break_out = False
 		next_entry = None
+		feed = None
+		break_out_next = False
+		try:
+			logger.debug("Getting top friends for user "+userid)
+			http_obj = httplib2.Http()	
+			resp2, feed = http_obj.request("https://graph.facebook.com/"+userid+"/feed/"+"?access_token="+access_token, method="GET")
+			feed = json.loads(feed)	
+			logger.debug("Tagged places for user "+userid)
+		except:
+			res['valid'] = False
+			res['msg'] = 'Error getting feed for the user'+userid
+			return res
 		while True:
 			if next_entry:
 				feed = None
@@ -98,15 +100,31 @@ def get_user_top_friends(userid, access_token):
 
 			for entry in feed['data']:
 				if 'place' in entry:
-					res['data'].append(entry)
+					#Check if the user has been tagged with 2 or more people
+					if 'with_tags' in entry and len(entry['with_tags']['data']) > 1:
+						place_tagged = {}
+						place_tagged['name'] = entry['place']['name']
+						place_tagged['city'] = entry['place']['location']['city'] if 'city' in entry['place']['location'] else None
+						place_tagged['street'] = entry['place']['location']['street'] if 'street' in entry['place']['location'] else None
+						place_tagged['country'] = entry['place']['location']['country'] if 'country' in entry['place']['location'] else None
+						place_tagged['state'] = entry['place']['location']['state'] if 'state' in entry['place']['location'] else None
+						place_tagged['latitude'] = entry['place']['location']['latitude'] if 'latitude' in entry['place']['location'] else None
+						place_tagged['longitude'] = entry['place']['location']['longitude'] if 'longitude' in entry['place']['location'] else None
+						place_tagged['date'] = entry['created_time']
+						place_tagged['friends'] = []
+						#Get the list of friends tagged with
+						for friend_tagged_with in entry['with_tags']['data']:
+							place_tagged['friends'].append(" "+friend_tagged_with['name'])	
+						place_tagged['friends'].append(entry['from']['name'])
+						res['data'].append(place_tagged)
+
 			if 'paging' in feed:
 				next_entry = feed['paging']['next'] if 'next' in feed['paging'] else None
-				if next_entry:
+				if not break_out_next and next_entry:
 					#Check if we have gone back one year
 					unix_time = next_entry.split("until=")[1]
-					if (calendar.timegm(datetime.utcnow().utctimetuple()) - int(unix_time)) > 31536000:
-						break_out = True
-						break	
+					if (calendar.timegm(datetime.utcnow().utctimetuple()) - int(unix_time)) > 189216000:
+						break_out_next = True
 				else:
 					break_out = True
 					break

@@ -27,6 +27,21 @@
 				$("#top_places_div").removeClass("hidden");
 			} 
 		}
+
+		function load_top_friends(data){
+			var txt = "";
+			txt += "<tr><th>Name</th><th>City</th><th>Street</th><th>Country</th><th>Latitude,Longitude</th><th>Friends</th><th>Date</th></tr>";
+			$.each(data, function(k, v) {
+				txt += "<tr><td>"+v.name+"</td><td>"+v.city+"</td><td>"+v.street+"</td><td>"+v.country+"</td><td>"+v.latitude+","+v.longitude+"</td><td>"+v.friends+"</td><td>"+v.date+"</td></tr>";
+			});
+			if(txt != ""){
+				
+				$("#top_friends_table").empty();
+				$("#top_friends_table").append(txt);
+				$("#top_friends_div").removeClass("hidden");
+			} 
+		}
+
 		function fb_logout(){
 			 FB.logout(function(){document.location.reload();});
 		}
@@ -74,6 +89,7 @@
 						success: function(res){
 							if (res.valid){
 								$("#get_top_tagged_loader").removeClass('dimmer');
+								load_top_friends(res.data);
 							}
 							else{
 								alert('Error fetching top friends');
@@ -173,7 +189,7 @@
 		<div class="ui teal label"></div>
 	  </a>
 	  <a id="fetch_top_friends" class="item">
-		Fetch top friends over past year
+		Fetch friends hung out with
 		<div class="ui label"></div>
 	  </a>
 	  <a class="item">
@@ -193,6 +209,11 @@
 	<div id="top_places_div" class="top_places_table hidden">
 		<div class="ui red ribbon label">Top 10 places you hangout at!</div>
 		<table id="top_places_table" class="ui small table segment">
+		</table>
+	</div>
+	<div id="top_friends_div" class="top_places_table hidden">
+		<div class="ui red ribbon label">Top friends you hangout with!</div>
+		<table id="top_friends_table" class="ui small table segment">
 		</table>
 	</div>
 </body>

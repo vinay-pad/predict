@@ -435,6 +435,8 @@ body > div.ui.vertical.menu {
 .top_places_table{
 	position: absolute;
 	top: 75px;
+	right: 32px;
+	left: 300px;
 }
 
 .login_bg{
