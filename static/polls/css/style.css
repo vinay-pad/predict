@@ -23,7 +23,7 @@ button {
 body {
 	font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	line-height: 1.4em;
-	background: #eaeaea url('bg.png');
+	background: #FFFFFF;
 	color: #4d4d4d;
 	width: 550px;
 	margin: 0 auto;
@@ -429,7 +429,7 @@ label[for='toggle-all'] {
 body > div.ui.vertical.menu {
 	position: absolute;
 	left: 10px;
-	top: 0px;
+	top: 70px;
 }
 
 .top_places_table{
@@ -456,4 +456,12 @@ body > div.ui.vertical.menu {
 	position: relative;
 	top: 200px;
 	left: 47px;
+}
+
+.top_menu
+{
+	position: absolute;
+	left: 10px;
+	top: 0px;	
+	right: 10px;
 }

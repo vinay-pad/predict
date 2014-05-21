@@ -79,7 +79,7 @@ def get_user_top_friends(userid, access_token):
 			http_obj = httplib2.Http()	
 			resp2, feed = http_obj.request("https://graph.facebook.com/"+userid+"/feed/"+"?access_token="+access_token, method="GET")
 			feed = json.loads(feed)	
-			logger.debug("Tagged places for user "+userid)
+			logger.debug("Tagged places for user "+str(feed))
 		except:
 			res['valid'] = False
 			res['msg'] = 'Error getting feed for the user'+userid
@@ -101,7 +101,7 @@ def get_user_top_friends(userid, access_token):
 			for entry in feed['data']:
 				if 'place' in entry:
 					#Check if the user has been tagged with 2 or more people
-					if 'with_tags' in entry and len(entry['with_tags']['data']) > 1:
+					if 'with_tags' in entry and len(entry['with_tags']['data']) > 0:
 						place_tagged = {}
 						place_tagged['name'] = entry['place']['name']
 						place_tagged['city'] = entry['place']['location']['city'] if 'city' in entry['place']['location'] else None
@@ -128,6 +128,8 @@ def get_user_top_friends(userid, access_token):
 				else:
 					break_out = True
 					break
+			else:
+				break_out = True
 			if break_out:
 				break
 	except:

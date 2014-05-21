@@ -14,6 +14,11 @@
   <!--[if lt IE 9]><script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 	<script>
 		
+		function clear_tables(){
+			$("#top_places_table").empty();
+			$("#top_friends_table").empty();
+		}
+		
 		function load_top_tagged_places_results(data){
 			var txt = "";
 			txt += "<tr><th>Name</th><th>City</th><th>Street</th><th>Country</th></tr>";
@@ -21,23 +26,23 @@
 				txt += "<tr><td>"+v.name+"</td><td>"+v.city+"</td><td>"+v.street+"</td><td>"+v.country+"</td></tr>";
 			});
 			if(txt != ""){
-				
-				$("#top_places_table").empty();
+				clear_tables();	
 				$("#top_places_table").append(txt);
+				$("#top_friends_div").addClass("hidden");
 				$("#top_places_div").removeClass("hidden");
 			} 
 		}
 
 		function load_top_friends(data){
 			var txt = "";
-			txt += "<tr><th>Name</th><th>City</th><th>Street</th><th>Country</th><th>Latitude,Longitude</th><th>Friends</th><th>Date</th></tr>";
+			txt += "<tr><th>Friends</th><th>Name</th><th>City</th><th>Street</th><th>Country</th><th>Latitude,Longitude</th><th>Date</th></tr>";
 			$.each(data, function(k, v) {
-				txt += "<tr><td>"+v.name+"</td><td>"+v.city+"</td><td>"+v.street+"</td><td>"+v.country+"</td><td>"+v.latitude+","+v.longitude+"</td><td>"+v.friends+"</td><td>"+v.date+"</td></tr>";
+				txt += "<tr><td>"+v.friends+"</td><td>"+v.name+"</td><td>"+v.city+"</td><td>"+v.street+"</td><td>"+v.country+"</td><td>"+v.latitude+","+v.longitude+"</td><td>"+v.date+"</td></tr>";
 			});
 			if(txt != ""){
-				
-				$("#top_friends_table").empty();
+				clear_tables();	
 				$("#top_friends_table").append(txt);
+				$("#top_places_div").addClass("hidden");
 				$("#top_friends_div").removeClass("hidden");
 			} 
 		}
@@ -75,7 +80,7 @@
 		}
 
 		function get_top_friends(){
-			$("#get_top_tagged_loader").addClass('dimmer');
+			$("#get_top_friends_loader").addClass('dimmer');
 			//Check if user is logged in
 			FB.getLoginStatus(function(response) {
 				if (response.status === 'connected') {
@@ -88,7 +93,7 @@
 								csrfmiddlewaretoken: '{{ csrf_token }}'},
 						success: function(res){
 							if (res.valid){
-								$("#get_top_tagged_loader").removeClass('dimmer');
+								$("#get_top_friends_loader").removeClass('dimmer');
 								load_top_friends(res.data);
 							}
 							else{
@@ -152,9 +157,16 @@
 		function make_active(id){
 			$('#get_top_tagged').removeClass('teal');	
 			$('#fetch_top_friends').removeClass('teal');	
+			$('#get_top_tagged').removeClass('active');	
+			$('#fetch_top_friends').removeClass('active');	
+		
+			$('#get_top_tagged_select').removeClass('teal');	
+			$('#fetch_top_friends_select').removeClass('teal');	
 			
 			if (id != null){
+				$('#'.concat(id)).addClass('active');	
 				$('#'.concat(id)).addClass('teal');	
+				$('#'.concat(id).concat('_select')).addClass('teal');	
 			}
 		}
 		$(document).ready(function() {
@@ -176,45 +188,53 @@
 	</script>
 </head>
 <body>
-	<div id="fetch_user_data_loader" class="ui active inverted dimmer">
-    	<div class="ui text loader">Loading user data</div>
-  	</div>
-	<div id="get_top_tagged_loader" class="ui active inverted">
-    	<div class="ui text loader">Fetchng user top tagged places</div>
-  	</div>
-
-	<div class="ui vertical menu">
-	  <a id="get_top_tagged" class="active teal item">
-		Get top tagged places
-		<div class="ui teal label"></div>
-	  </a>
-	  <a id="fetch_top_friends" class="item">
-		Fetch friends hung out with
-		<div class="ui label"></div>
-	  </a>
-	  <a class="item">
-		Not yet implemented
-		<div class="ui label"></div>
-	  </a>
-	  <div class="item">
-		<div class="ui small icon input">
-		  <input type="text" placeholder="Search">
-		  <i class="search icon"></i>
+		<div id="fetch_user_data_loader" class="ui active inverted dimmer">
+			<div class="ui text loader">Loading user data</div>
 		</div>
-	  </div>
-	</div>
+		<div id="get_top_tagged_loader" class="ui active inverted">
+			<div class="ui text loader">Fetchng user top tagged places</div>
+		</div>
 
-	<div id="fb_logout" class="negative ui button fb_logout">Logout</div>
+		<div id="get_top_friends_loader" class="ui active inverted">
+			<div class="ui text loader">Fetchng user top tagged places.This may take few mins</div>
+		</div>
+		<div class="ui vertical menu">
+		  <a id="get_top_tagged" class="active teal item">
+			Most tagged at
+			<div id="get_top_tagged_select" class="ui teal label"></div>
+		  </a>
+		  <a id="fetch_top_friends" class="item">
+			Most tagged with
+			<div id="fetch_top_friends_select" class="ui label"></div>
+		  </a>
+		  <div class="item">
+			<div class="ui small icon input">
+			  <input type="text" placeholder="Search">
+			  <i class="search icon"></i>
+			</div>
+		  </div>
+		</div>
+		<div class="ui inverted menu top_menu">
+			<a class="active item">
+				<i class="home icon"></i> Top places
+			</a>
+			<a class="item">
+				<i class="user icon"></i> Top friends
+			</a>
+			<a id="fb_logout" class="right item">Logout
+			</div>
+		</div>
 
-	<div id="top_places_div" class="top_places_table hidden">
-		<div class="ui red ribbon label">Top 10 places you hangout at!</div>
-		<table id="top_places_table" class="ui small table segment">
-		</table>
-	</div>
-	<div id="top_friends_div" class="top_places_table hidden">
-		<div class="ui red ribbon label">Top friends you hangout with!</div>
-		<table id="top_friends_table" class="ui small table segment">
-		</table>
-	</div>
+		<div id="top_places_div" class="top_places_table hidden">
+			<div class="ui red ribbon label">Top places you hangout at!</div>
+			<table id="top_places_table" class="ui small table segment">
+			</table>
+		</div>
+		<div id="top_friends_div" class="top_places_table hidden">
+			<div class="ui red ribbon label">Top friends you hangout with!</div>
+			<table id="top_friends_table" class="ui small table segment">
+			</table>
+		</div>
+
 </body>
 </html>
