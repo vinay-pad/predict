@@ -13,9 +13,10 @@ def store_tagged_places(user):
 		Method to retrieve all the tagged places of a user.
 	"""
 	res = {}
+	http_obj = httplib2.Http()	
+	tagged_local_business = []
 	try:
-		logger.debug("Getting tagges places for user "+user.firstname+" "+user.lastname)
-		http_obj = httplib2.Http()	
+		logger.debug("Getting tagged places for user "+user.firstname+" "+user.lastname)
 		resp2, tagged_places = http_obj.request("https://graph.facebook.com/"+user.userid+"/tagged_places/"+"?limit=500&access_token="+user.access_token, method="GET")
 		tagged_places = json.loads(tagged_places)	
 		logger.debug("Tagged places for user "+user.firstname+" :"+str(tagged_places))
@@ -23,9 +24,30 @@ def store_tagged_places(user):
 		res['valid'] = False
 		res['msg'] = 'Error getting tagged places for user'+user.firstname
 		return res
+	#Filter out non interesting places like city names etc. Only fetch Local businesses
+	try:
+		for entry in tagged_places['data']:
+			place_id = entry['place']['id']
+			#Now fetch the category for this place
+			logger.debug("Getting category of places for user "+user.firstname+" "+user.lastname)
+			resp3, place_details = http_obj.request("https://graph.facebook.com/"+place_id+"/"+"?access_token="+user.access_token, method="GET")
+			place_details = json.loads(place_details)	
+			if str(place_details['category']) == "Local business":
+				for cat_list in place_details['category_list']:
+					if 'city' == cat_list['name']:
+						continue
+				logger.debug("\n@@Removing tagged places entry for user "+user.firstname+" :"+str(place_details['category'])+"\n")
+				#Remove this place from the list.
+				tagged_local_business.append(entry)
+	except:
+		res['valid'] = False
+		res['msg'] = 'Error getting categories of tagged places for user'+user.firstname
+		return res
+		
+	
 	try:	
 		#For each tagged instance create a taggedInstance, taggedPlace and taggedLocation instance
-		for entry in tagged_places['data']:
+		for entry in tagged_local_business:
 			latitude = str(entry['place']['location']['latitude']) if 'latitude' in entry['place']['location'] else None
 			longitude = str(entry['place']['location']['longitude']) if 'longitude' in entry['place']['location'] else None
 			try:

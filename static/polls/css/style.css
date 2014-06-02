@@ -445,8 +445,7 @@ body > div.ui.vertical.menu {
 	background-repeat:no-repeat;
 	height: 380px;
 	width: 586px;
-	position: absolute;
-	left: 340px;
+	position: relative;
 	bottom: 140px;
 	
 }

@@ -13,6 +13,7 @@ import urllib2
 from polls.places import store_tagged_places
 from polls.user_stats import get_user_most_tagged_places, get_user_top_friends
 from polls.dao.base_dao import save_fb_user, fetch_fb_user
+from fetch_user_info import fetch_user_info_from_fb
 
 
 # Get an instance of a logger
@@ -45,9 +46,35 @@ def	home(request):
 	logger.info("Loading home page")
 	access_token = request.GET.get('access_token')
 	userid = request.GET.get('userid')
+	res = {}
+	res['valid'] = False
 
 	#Update the access token for the user in the database
-	user = fetch_fb_user(userid)
+	try:
+		user = fetch_fb_user(userid)
+	except IndexError:
+		#New user, add user to database
+		try:
+			content = fetch_user_info_from_fb(userid, access_token)
+		except:
+			logger.debug("Error fetching user info from facebook for userid "+str(userid)+"\n");
+			return render(request, 'polls/error.html', {"message": "Something went wrong. Please logout and login again!"})
+
+		#confirm userid is equal to id returned from graph api
+		if 'id' not in content or userid != content['id']:
+			return render(request, 'polls/error.html', {"message": "Something went wrong. Please logout and login again!"})
+		content['access_token'] = access_token
+		logger.debug("Trying to save user")
+		try:
+			res = save_fb_user(content)
+			logger.debug("Saved user info succesfully"+str(res))
+		except:
+			logger.exception("Unexpected error while saving user: ", sys.exc_info()[0])
+			return HttpResponse(json.dumps(res), content_type="application/json")		
+	
+	if res['valid']:
+		user = fetch_fb_user(userid)
+		
 	logger.debug('Got user '+str(user)+' for userid '+str(userid)+str(access_token))
 	if user:
 		user.access_token = access_token
@@ -61,12 +88,8 @@ def register(request):
 	res['valid'] = False
 	if  userid and access_token:
 		#Now use the access token to get the user information from graph api
-		http_obj = httplib2.Http()	
 		try:
-			logger.debug("eeRegistering user "+str(userid)+" "+str(access_token))
-			resp, content = http_obj.request("https://graph.facebook.com/"+userid+"?access_token="+access_token, method="GET")
-			content = json.loads(content)	
-			logger.debug("Content: "+str(content))
+			content = fetch_user_info_from_fb(userid, access_token)
 		except:
 			return render(request, 'polls/error.html', {"message": "Something went wrong. Please logout and login again!"})
 

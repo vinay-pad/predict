@@ -14,7 +14,7 @@
   <!--[if lt IE 9]><script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 	<script>
 		$(document).ready(function() {
-			var permsNeeded = ['email,user_tagged_places,user_location,read_stream'];
+			var permsNeeded = ['user_tagged_places'];
 			function fb_login(){
 				FB.login(function(response) {
 					if (response.status === 'connected') {
@@ -27,7 +27,7 @@
 							dataType : "json",
 							success: function( data ){
 								if (data.valid){
-									window.location.href = 'polls/home';
+									window.location.href = 'polls/home?access_token='+data.access_token+'&userid='+data.userid;
 								}
 							}
 						});

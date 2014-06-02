@@ -34,9 +34,9 @@ class FBLocation(models.Model):
 
 class User(models.Model):
 	userid = models.CharField(max_length=200, primary_key=True)
-	firstname = models.CharField(max_length=200)
-	lastname = models.CharField(max_length=200)
-	email = models.EmailField(max_length=254)
+	firstname = models.CharField(max_length=200, null=True)
+	lastname = models.CharField(max_length=200, null=True)
+	email = models.EmailField(max_length=254, null=True)
 	birthday = models.DateTimeField(null=True)
 	gender = models.CharField(max_length=20)
 	location = models.ForeignKey(FBLocation, null=True)

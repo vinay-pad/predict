@@ -53,6 +53,8 @@ def save_fb_user(content):
 		user.location = update_fb_user_location(content['location']) if 'location' in content else None
 		user.save()	
 		res['valid'] = True
+		res['userid'] = content['id']
+		res['access_token'] = content['access_token']
 	except:
 		logger.exception("Unexpected error while saving user: "+str(sys.exc_info()[0]))
 		res['valid'] = False
@@ -63,6 +65,8 @@ def save_fb_user(content):
 def fetch_fb_user(userid):
 	try:
 		user = User.objects.filter(userid=userid)[0]
+	except IndexError:
+		raise
 	except:
 		logger.exception("Error fetching user information\n")
 		return None
